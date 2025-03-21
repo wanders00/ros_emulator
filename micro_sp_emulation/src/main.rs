@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let state = state.extend(op_vars, true);
 
     let (tx, rx) = mpsc::channel(32); // Experiment with buffer size
-    tokio::spawn(state_manager(rx, state));
+    tokio::spawn(redis_state_manager(rx, state));
 
     r2r::log_info!(NODE_ID, "Spawning emulators...");
 
@@ -92,13 +92,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tokio::time::sleep(std::time::Duration::from_millis(200)).await;
     r2r::log_info!(NODE_ID, "Spawning auto operation runner...");
 
-    // let model_clone = model.clone();
-    // let tx_clone = tx.clone();
-    // tokio::task::spawn(async move {
-    //     auto_operation_runner(&model_clone.name, &model_clone, tx_clone)
-    //         .await
-    //         .unwrap()
-    // });
+    let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
+    let tx_clone = tx.clone();
+    tokio::task::spawn(async move {
+        spawn_state_publisher( arc_node_clone, tx_clone)
+            .await
+            .unwrap()
+    });
 
     tokio::time::sleep(std::time::Duration::from_millis(200)).await;
     // std::thread::sleep(std::time::Duration::from_millis(1000));
@@ -106,7 +106,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     r2r::log_info!(NODE_ID, "Spawning operation runner...");
 
     let tx_clone = tx.clone();
-    tokio::task::spawn(async move { operation_runner(&model, tx_clone).await.unwrap() });
+    tokio::task::spawn(async move { planned_operation_runner(&model, tx_clone).await.unwrap() });
 
     tokio::time::sleep(std::time::Duration::from_millis(200)).await;
     // std::thread::sleep(std::time::Duration::from_millis(1000));
