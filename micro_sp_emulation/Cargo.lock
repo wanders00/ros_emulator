@@ -814,7 +814,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 [[package]]
 name = "micro_sp"
 version = "0.1.0"
-source = "git+https://github.com/endre90/micro_sp?branch=master#1a2bdbecea543bfaa93be02654fa94eb396f85ec"
+source = "git+https://github.com/endre90/micro_sp?branch=master#e535650bfe4a0586b4c22a4f435ff36ef2707c83"
 dependencies = [
  "env_logger",
  "log",
@@ -822,6 +822,7 @@ dependencies = [
  "peg",
  "redis",
  "serde",
+ "serde_json",
  "tokio",
 ]
 
@@ -1266,9 +1267,9 @@ dependencies = [
 
 [[package]]
 name = "redis"
-version = "0.29.1"
+version = "0.29.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8034fb926579ff49d3fe58d288d5dcb580bf11e9bccd33224b45adebf0fd0c23"
+checksum = "b110459d6e323b7cda23980c46c77157601199c9da6241552b284cd565a7a133"
 dependencies = [
  "arc-swap",
  "bytes",

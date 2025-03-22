@@ -193,9 +193,9 @@ async fn perform_test(
         interval.tick().await;
     }
 
-    tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
+    // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
 
-    r2r::log_warn!(NODE_ID, "All tests are finished. Generating report...");
+    // r2r::log_warn!(NODE_ID, "All tests are finished. Generating report...");
 
     // TODO
     // Measure operation and plan execution times, and measure total failure rates...

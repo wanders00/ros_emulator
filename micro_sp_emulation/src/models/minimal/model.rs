@@ -49,7 +49,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
             vec![
                 "var:gantry_request_trigger <- false",
                 "var:gantry_request_state <- initial",
-                "var:gantry_locked_estimated <- UNKNOWN",
+                "var:gantry_locked_estimated <- UNKNOWN_bool",
             ],
             Vec::<&str>::new(),
             &state,
@@ -93,7 +93,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
             vec![
                 "var:gantry_request_trigger <- false",
                 "var:gantry_request_state <- initial",
-                "var:gantry_locked_estimated <- UNKNOWN",
+                "var:gantry_locked_estimated <- UNKNOWN_bool",
             ],
             Vec::<&str>::new(),
             &state,
@@ -138,7 +138,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
             vec![
                 "var:gantry_request_trigger <- false",
                 "var:gantry_request_state <- initial",
-                "var:gantry_calibrated_estimated <- UNKNOWN",
+                "var:gantry_calibrated_estimated <- UNKNOWN_bool",
             ],
             Vec::<&str>::new(),
             &state,
@@ -187,7 +187,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
                 vec![
                     "var:gantry_request_trigger <- false",
                     "var:gantry_request_state <- initial",
-                    "var:gantry_position_estimated <- UNKNOWN",
+                    "var:gantry_position_estimated <- UNKNOWN_string",
                 ],
                 Vec::<&str>::new(),
                 &state,
@@ -345,7 +345,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
                 vec![
                     "var:robot_request_trigger <- false",
                     "var:robot_request_state <- initial",
-                    &format!("var:robot_position_estimated <- UNKNOWN"),
+                    &format!("var:robot_position_estimated <- UNKNOWN_string"),
                 ],
                 Vec::<&str>::new(),
                 &state,
@@ -363,10 +363,10 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
             Vec::from([Transition::parse(
                 &format!("start_op_robot_check_for_{tool}_mounted"),
                 &format!(
-                    "(var:robot_mounted_checked == false || var:robot_mounted_checked == UNKNOWN) \
+                    "(var:robot_mounted_checked == false || var:robot_mounted_checked == UNKNOWN_bool) \
                     && var:robot_request_state == initial \
                     && var:robot_request_trigger == false \
-                    && var:robot_mounted_estimated == UNKNOWN"
+                    && var:robot_mounted_estimated == UNKNOWN_string"
                 ),
                 "true",
                 vec![
@@ -413,7 +413,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
                 vec![
                     "var:robot_request_trigger <- false",
                     "var:robot_request_state <- initial",
-                    &format!("var:robot_mounted_estimated <- UNKNOWN"),
+                    &format!("var:robot_mounted_estimated <- UNKNOWN_string"),
                 ],
                 Vec::<&str>::new(),
                 &state,
@@ -464,7 +464,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
                 vec![
                     "var:robot_request_trigger <- false",
                     "var:robot_request_state <- initial",
-                    &format!("var:robot_mounted_estimated <- UNKNOWN"),
+                    &format!("var:robot_mounted_estimated <- UNKNOWN_string"),
                 ],
                 Vec::<&str>::new(),
                 &state,
@@ -515,7 +515,7 @@ pub fn minimal_model(name: &str, state: &State) -> (Model, State) {
                 vec![
                     "var:robot_request_trigger <- false",
                     "var:robot_request_state <- initial",
-                    &format!("var:robot_mounted_estimated <- UNKNOWN"),
+                    &format!("var:robot_mounted_estimated <- UNKNOWN_string"),
                 ],
                 Vec::<&str>::new(),
                 &state,

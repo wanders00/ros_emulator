@@ -39,7 +39,7 @@ pub async fn spawn_state_publisher(
                     SPValue::String(val) => Value::from(format!("{}", val)),
                     SPValue::Int64(val) => Value::from(format!("{}", val)),
                     SPValue::Time(val) => Value::from(format!("{:?}", val)),
-                    SPValue::UNKNOWN => Value::from(format!("UNKNOWN")),
+                    SPValue::Unknown(_) => Value::from(format!("UNKNOWN")),
                 },
             );
         });
