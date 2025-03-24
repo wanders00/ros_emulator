@@ -31,8 +31,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let op_vars = generate_operation_state_variables(&model, coverability_tracking);
     let state = state.extend(op_vars, true);
 
-    let (tx, rx) = mpsc::channel(32); // Experiment with buffer size
+    let (tx, rx) = mpsc::channel(100); // Experiment with buffer size
     tokio::spawn(redis_state_manager(rx, state));
+
+    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
 
     r2r::log_info!(NODE_ID, "Spawning emulators...");
 
