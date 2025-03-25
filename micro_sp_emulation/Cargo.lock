@@ -815,7 +815,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 [[package]]
 name = "micro_sp"
 version = "0.1.0"
-source = "git+https://github.com/endre90/micro_sp?branch=master#66f4c00b9edf0576e0b92acf3b253ff44d524e63"
+source = "git+https://github.com/endre90/micro_sp?branch=master#6160fa7de4127a42bbcc8db25309e4740e5536b1"
 dependencies = [
  "env_logger",
  "log",

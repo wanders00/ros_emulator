@@ -1,12 +1,14 @@
 use micro_sp::*;
 
 fn generate_basic_variables(name: &str, state: &State) -> State {
+    let resource_online = bv!(&&format!("{}_resource_online", name));
     let request_trigger = bv!(&&format!("{}_request_trigger", name));
     let request_state = v!(&&format!("{}_request_state", name));
     let total_fail_counter = iv!(&&format!("{}_total_fail_counter", name));
     let subsequent_fail_counter = iv!(&&format!("{}_subsequent_fail_counter", name));
     let ref_counter = iv!(&&format!("{}_ref_counter", name));
 
+    let state = state.add(assign!(resource_online, false.to_spvalue()));
     let state = state.add(assign!(request_trigger, false.to_spvalue()));
     let state = state.add(assign!(request_state, "initial".to_spvalue()));
     let state = state.add(assign!(total_fail_counter, 0.to_spvalue()));
@@ -79,6 +81,8 @@ pub fn state() -> State {
     // -----------------------------------------------------------------------
 
     let state = generate_basic_variables("gantry", &state);
+
+
 
     let gantry_command_command = v!("gantry_command_command");
     let gantry_speed_command = fv!("gantry_speed_command");

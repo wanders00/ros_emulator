@@ -1,7 +1,9 @@
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use tokio::sync::{mpsc, oneshot};
-use tokio::time::{interval, Duration};
+
+use r2r::micro_sp_emulation_msgs::srv::{TriggerGantry, TriggerRobot};
+use r2r::QosProfile;
 
 use micro_sp::*;
 use micro_sp_emulation::*;
@@ -34,46 +36,81 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let (tx, rx) = mpsc::channel(100); // Experiment with buffer size
     tokio::spawn(redis_state_manager(rx, state));
 
-    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
-    r2r::log_info!(NODE_ID, "Spawning emulators...");
+    log::info!(target: NODE_ID, "Spawning emulators...");
 
     let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     tokio::task::spawn(async move { spawn_gantry_emulator_server(arc_node_clone).await.unwrap() });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-
     let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     tokio::task::spawn(async move { spawn_robot_emulator_server(arc_node_clone).await.unwrap() });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
-    r2r::log_info!(NODE_ID, "Spawning interfaces...");
+    log::info!(target: NODE_ID, "Spawning interfaces...");
+
+    let gantry_client = arc_node
+        .lock()
+        .unwrap()
+        .create_client::<TriggerGantry::Service>(
+            "/gantry_emulator_service",
+            QosProfile::default(),
+        )?;
+    let gantry_timer = arc_node
+        .lock()
+        .unwrap()
+        .create_wall_timer(std::time::Duration::from_millis(CLIENT_TICKER_RATE))?;
+    let robot_client = arc_node
+        .lock()
+        .unwrap()
+        .create_client::<TriggerRobot::Service>("/robot_emulator_service", QosProfile::default())?;
+    let robot_timer = arc_node
+        .lock()
+        .unwrap()
+        .create_wall_timer(std::time::Duration::from_millis(CLIENT_TICKER_RATE))?;
+    let waiting_for_gantry = r2r::Node::is_available(&gantry_client)?;
+    let waiting_for_robot = r2r::Node::is_available(&robot_client)?;
 
     let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
+    let handle = std::thread::spawn(move || loop {
+        arc_node_clone
+            .lock()
+            .unwrap()
+            .spin_once(std::time::Duration::from_millis(1000));
+    });
+
+    log::warn!(target: "gantry_interface", "Waiting for the Gantry resource to be online.");
+    waiting_for_gantry.await?;
+    log::warn!(target: "robot_interface", "Waiting for the Robot resource to be online.");
+    waiting_for_robot.await?;
+    log::info!(target: "gantry_interface", "Gantry reource online.");
+    log::info!(target: "robot_interface", "Robot reource online.");
+
     let tx_clone = tx.clone();
     tokio::task::spawn(async move {
-        gantry_client_ticker(arc_node_clone, tx_clone)
+        gantry_client_ticker(&gantry_client, gantry_timer, tx_clone)
             .await
             .unwrap()
     });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-
-    let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
+    // let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     let tx_clone = tx.clone();
-    tokio::task::spawn(async move { robot_client_ticker(arc_node_clone, tx_clone).await.unwrap() });
+    tokio::task::spawn(async move {
+        robot_client_ticker(&robot_client, robot_timer, tx_clone)
+            .await
+            .unwrap()
+    });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-
-    r2r::log_info!(NODE_ID, "Spawning operation planner...");
+    log::info!(target: NODE_ID, "Spawning operation planner...");
 
     let model_clone = model.clone();
     let tx_clone = tx.clone();
     tokio::task::spawn(async move { planner_ticker(&model_clone, tx_clone).await.unwrap() });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    r2r::log_info!(NODE_ID, "Spawning auto transition runner...");
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+    log::info!(target: NODE_ID, "Spawning auto transition runner...");
 
     let model_clone = model.clone();
     let tx_clone = tx.clone();
@@ -83,47 +120,31 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .unwrap()
     });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    r2r::log_info!(NODE_ID, "Spawning auto operation runner...");
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
-    let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
-    let tx_clone = tx.clone();
-    tokio::task::spawn(async move {
-        spawn_state_publisher(arc_node_clone, tx_clone)
-            .await
-            .unwrap()
-    });
+    // log::info!(target: NODE_ID, "Spawning state publisher...");
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    // std::thread::sleep(std::time::Duration::from_millis(1000));
+    // let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
+    // let tx_clone = tx.clone();
+    // tokio::task::spawn(async move {
+    //     spawn_state_publisher(arc_node_clone, tx_clone)
+    //         .await
+    //         .unwrap()
+    // });
 
-    r2r::log_info!(NODE_ID, "Spawning operation runner...");
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+    log::info!(target: NODE_ID, "Spawning operation runner...");
 
     let tx_clone = tx.clone();
     tokio::task::spawn(async move { planned_operation_runner(&model, tx_clone).await.unwrap() });
 
-    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
-    // std::thread::sleep(std::time::Duration::from_millis(1000));
+    // tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
-    r2r::log_info!(NODE_ID, "Spawning test generator...");
-
-    // let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     let tx_clone = tx.clone();
     tokio::task::spawn(async move { perform_test(&name, tx_clone).await.unwrap() });
 
-    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-    // std::thread::sleep(std::time::Duration::from_millis(1000));
-
-    // keep the node alive
-    let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
-    let handle = std::thread::spawn(move || loop {
-        arc_node_clone
-            .lock()
-            .unwrap()
-            .spin_once(std::time::Duration::from_millis(1000));
-    });
-
-    r2r::log_info!(NODE_ID, "Node started.");
+    log::info!(target: NODE_ID, "Node started.");
 
     handle.join().unwrap();
 
@@ -134,64 +155,45 @@ async fn perform_test(
     name: &str,
     command_sender: mpsc::Sender<StateManagement>,
 ) -> Result<(), Box<dyn Error>> {
-    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-    r2r::log_warn!(NODE_ID, "Starting tests...");
-    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-    r2r::log_warn!(NODE_ID, "Tests started.");
-    let mut interval = interval(Duration::from_millis(TEST_TICKER_RATE));
-    let mut test_nr = 0;
-    let mut goals = vec!["var:robot_mounted_estimated == suction_tool"];
-    // let mut goals = vec!("var:robot_mounted_checked == true");
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    log::info!(target: NODE_ID, "Setting goal: var:robot_mounted_estimated == suction_tool");
+    let goal = "var:robot_mounted_estimated == suction_tool";
 
-    'test_loop: loop {
-        let (response_tx, response_rx) = oneshot::channel();
+    let (response_tx, response_rx) = oneshot::channel();
+    command_sender
+        .send(StateManagement::GetState(response_tx))
+        .await?; // TODO: maybe we can just ask for values from the guard
+    let state = response_rx.await?;
+
+    let plan_state = state.get_string_or_default_to_unknown(
+        &format!("{}_tester", name),
+        &format!("{}_plan_state", name),
+    );
+
+    if PlanState::from_str(&plan_state) == PlanState::Failed
+        || PlanState::from_str(&plan_state) == PlanState::Completed
+        || PlanState::from_str(&plan_state) == PlanState::UNKNOWN
+    {
+        let new_state = state
+            // Optional to test what happens when... (look in the Emulation msg for details)
+            .update("gantry_emulate_execution_time", 2.to_spvalue())
+            .update("gantry_emulated_execution_time", 10.to_spvalue())
+            .update("gantry_emulate_failure_rate", 2.to_spvalue())
+            .update("gantry_emulated_failure_rate", 30.to_spvalue())
+            .update("gantry_emulate_failure_cause", 2.to_spvalue())
+            .update(
+                "gantry_emulated_failure_cause",
+                vec!["violation", "collision", "detected_drift"].to_spvalue(),
+            )
+            .update("minimal_model_goal", goal.to_spvalue())
+            .update("minimal_model_replan_trigger", true.to_spvalue())
+            .update("minimal_model_replanned", false.to_spvalue());
+
+        let modified_state = state.get_diff_partial_state(&new_state);
         command_sender
-            .send(StateManagement::GetState(response_tx))
-            .await?; // TODO: maybe we can just ask for values from the guard
-        let state = response_rx.await?;
-
-        let plan_state = state.get_string_or_default_to_unknown(
-            &format!("{}_tester", name),
-            &format!("{}_plan_state", name),
-        );
-
-        if goals.len() != 0 {
-            // println!("{:?}", goals);
-
-            if PlanState::from_str(&plan_state) == PlanState::Failed
-                || PlanState::from_str(&plan_state) == PlanState::Completed
-                || PlanState::from_str(&plan_state) == PlanState::UNKNOWN
-            {
-                test_nr = test_nr + 1;
-                r2r::log_warn!(NODE_ID, "Starting test {}.", test_nr);
-                let new_state = state
-                    // Optional to test what happens when... (look in the Emulation msg for details)
-                    .update("gantry_emulate_execution_time", 2.to_spvalue())
-                    .update("gantry_emulated_execution_time", 3000.to_spvalue())
-                    .update("gantry_emulate_failure_rate", 2.to_spvalue())
-                    .update("gantry_emulated_failure_rate", 30.to_spvalue())
-                    .update("gantry_emulate_failure_cause", 2.to_spvalue())
-                    .update(
-                        "gantry_emulated_failure_cause",
-                        vec!["violation", "collision", "detected_drift"].to_spvalue(),
-                    )
-                    .update("minimal_model_goal", goals.remove(0).to_spvalue())
-                    .update("minimal_model_replan_trigger", true.to_spvalue())
-                    .update("minimal_model_replanned", false.to_spvalue());
-
-                let modified_state = state.get_diff_partial_state(&new_state);
-                command_sender
-                    .send(StateManagement::SetPartialState(modified_state))
-                    .await?;
-                tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
-            }
-        } else {
-            break 'test_loop;
-        }
-        interval.tick().await;
+            .send(StateManagement::SetPartialState(modified_state))
+            .await?;
     }
-
-    // tokio::time::sleep(std::time::Duration::from_millis(2000)).await;
 
     // r2r::log_warn!(NODE_ID, "All tests are finished. Generating report...");
 

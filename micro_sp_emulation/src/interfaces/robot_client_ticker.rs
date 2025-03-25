@@ -1,32 +1,16 @@
-use crate::*;
 use micro_sp::*;
 use r2r::micro_sp_emulation_msgs::msg::Emulation;
 use r2r::micro_sp_emulation_msgs::srv::TriggerRobot;
-use r2r::QosProfile;
-use std::sync::{Arc, Mutex};
 use tokio::sync::{mpsc, oneshot};
 
 pub async fn robot_client_ticker(
-    arc_node: Arc<Mutex<r2r::Node>>,
+    client: &r2r::Client<TriggerRobot::Service>,
+    mut timer: r2r::Timer,
     command_sender: mpsc::Sender<StateManagement>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let client = arc_node
-        .lock()
-        .unwrap()
-        .create_client::<TriggerRobot::Service>("/robot_emulator_service", QosProfile::default())?;
-    let waiting_for_server = r2r::Node::is_available(&client)?;
 
-    let mut timer = arc_node
-        .lock()
-        .unwrap()
-        .create_wall_timer(std::time::Duration::from_millis(CLIENT_TICKER_RATE))?;
-
-    let target = "robot_client_ticker";
-    r2r::log_warn!("robot_interface", "Waiting for the server...");
-    waiting_for_server.await?;
-    r2r::log_info!("robot_interface", "Server available.");
-
-    r2r::log_info!("robot_interface", "Spawned.");
+    let target = "robot_interface";
+    log::info!(target: target, "Online.");
 
     loop {
         let (response_tx, response_rx) = oneshot::channel();
@@ -77,7 +61,7 @@ pub async fn robot_client_ticker(
         if request_trigger {
             request_trigger = false;
             if request_state == ServiceRequestState::Initial.to_string() {
-                r2r::log_info!(
+                log::info!(target:
                     "robot_interface",
                     "Requesting to {}.",
                     robot_command_command
@@ -101,7 +85,7 @@ pub async fn robot_client_ticker(
                         Ok(response) => match robot_command_command.as_str() {
                             "move" => {
                                 if response.success {
-                                    r2r::log_info!(
+                                    log::info!(target:
                                         "robot_interface",
                                         "Requested move to '{}' succeeded.",
                                         robot_position_command
@@ -110,7 +94,7 @@ pub async fn robot_client_ticker(
                                     robot_position_estimated = robot_position_command;
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!(
+                                    log::error!(target:
                                         "robot_interface",
                                         "Requested move to '{}' failed.",
                                         robot_position_command
@@ -122,11 +106,11 @@ pub async fn robot_client_ticker(
                             }
                             "pick" => {
                                 if response.success {
-                                    r2r::log_info!("robot_interface", "Requested pick succeeded.");
+                                    log::info!(target: "robot_interface", "Requested pick succeeded.");
                                     request_state = ServiceRequestState::Succeeded.to_string();
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!("robot_interface", "Requested pick failed.");
+                                    log::error!(target: "robot_interface", "Requested pick failed.");
                                     request_state = ServiceRequestState::Failed.to_string();
                                     subsequent_fail_counter = subsequent_fail_counter + 1;
                                     total_fail_counter = total_fail_counter + 1;
@@ -134,11 +118,11 @@ pub async fn robot_client_ticker(
                             }
                             "place" => {
                                 if response.success {
-                                    r2r::log_info!("robot_interface", "Requested place succeeded.");
+                                    log::info!(target: "robot_interface", "Requested place succeeded.");
                                     request_state = ServiceRequestState::Succeeded.to_string();
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!("robot_interface", "Requested place failed.");
+                                    log::error!(target: "robot_interface", "Requested place failed.");
                                     request_state = ServiceRequestState::Failed.to_string();
                                     subsequent_fail_counter = subsequent_fail_counter + 1;
                                     total_fail_counter = total_fail_counter + 1;
@@ -146,11 +130,11 @@ pub async fn robot_client_ticker(
                             }
                             "mount" => {
                                 if response.success {
-                                    r2r::log_info!("robot_interface", "Requested mount succeeded.");
+                                    log::info!(target: "robot_interface", "Requested mount succeeded.");
                                     request_state = ServiceRequestState::Succeeded.to_string();
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!("robot_interface", "Requested mount failed.");
+                                    log::error!(target: "robot_interface", "Requested mount failed.");
                                     request_state = ServiceRequestState::Failed.to_string();
                                     subsequent_fail_counter = subsequent_fail_counter + 1;
                                     total_fail_counter = total_fail_counter + 1;
@@ -158,14 +142,13 @@ pub async fn robot_client_ticker(
                             }
                             "unmount" => {
                                 if response.success {
-                                    r2r::log_info!(
-                                        "robot_interface",
+                                    log::info!(target: "robot_interface",
                                         "Requested unmount succeeded."
                                     );
                                     request_state = ServiceRequestState::Succeeded.to_string();
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!("robot_interface", "Requested unmount failed.");
+                                    log::error!(target: "robot_interface", "Requested unmount failed.");
                                     request_state = ServiceRequestState::Failed.to_string();
                                     subsequent_fail_counter = subsequent_fail_counter + 1;
                                     total_fail_counter = total_fail_counter + 1;
@@ -173,16 +156,14 @@ pub async fn robot_client_ticker(
                             }
                             "check_mounted_tool" => {
                                 if response.success {
-                                    r2r::log_info!(
-                                        "robot_interface",
+                                    log::info!(target: "robot_interface",
                                         "Requested check_mounted_tool succeeded."
                                     );
                                     request_state = ServiceRequestState::Succeeded.to_string();
                                     robot_mounted_one_time_measured = response.checked_mounted_tool;
                                     subsequent_fail_counter = 0;
                                 } else {
-                                    r2r::log_error!(
-                                        "robot_interface",
+                                    log::error!(target: "robot_interface",
                                         "Requested check_mounted_tool failed."
                                     );
                                     request_state = ServiceRequestState::Failed.to_string();
@@ -192,8 +173,7 @@ pub async fn robot_client_ticker(
                                 }
                             }
                             _ => {
-                                r2r::log_info!(
-                                    "robot_interface",
+                                log::error!(target: "robot_interface",
                                     "Requested command '{}' is invalid.",
                                     robot_command_command
                                 );
@@ -203,14 +183,14 @@ pub async fn robot_client_ticker(
                             }
                         },
                         Err(e) => {
-                            r2r::log_info!("robot_interface", "Request failed with: {e}.");
+                            log::error!(target: "robot_interface", "Request failed with: {e}.");
                             request_state = ServiceRequestState::Failed.to_string();
                             subsequent_fail_counter = subsequent_fail_counter + 1;
                             total_fail_counter = total_fail_counter + 1;
                         }
                     },
                     Err(e) => {
-                        r2r::log_info!("robot_interface", "Request failed with: {e}.");
+                        log::error!(target: "robot_interface", "Request failed with: {e}.");
                         request_state = ServiceRequestState::Failed.to_string();
                         subsequent_fail_counter = subsequent_fail_counter + 1;
                         total_fail_counter = total_fail_counter + 1;

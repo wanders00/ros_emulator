@@ -58,18 +58,18 @@ pub async fn spawn_gantry_emulator_server(
                 };
 
                 match request.message.command.as_str() {
-                    "move" => r2r::log_info!(
+                    "move" => log::info!(target:
                         "gantry_emulator",
                         "Got request to move to {}.",
                         request.message.position
                     ),
                     "calibrate" => {
-                        r2r::log_info!("gantry_emulator", "Got request to calibrate.")
+                        log::info!(target: "gantry_emulator", "Got request to calibrate.")
                     }
-                    "lock" => r2r::log_info!("gantry_emulator", "Got request to lock."),
-                    "unlock" => r2r::log_info!("gantry_emulator", "Got request to unlock."),
+                    "lock" => log::info!(target: "gantry_emulator", "Got request to lock."),
+                    "unlock" => log::info!(target: "gantry_emulator", "Got request to unlock."),
                     _ => {
-                        r2r::log_warn!("gantry_emulator", "Unknown command");
+                        log::warn!(target: "gantry_emulator", "Unknown command");
                         fail = true;
                     }
                 };
@@ -99,7 +99,7 @@ pub async fn spawn_gantry_emulator_server(
                         failure_cause: "".to_string(),
                         info: success_info.clone(),
                     };
-                    r2r::log_info!("gantry_emulator", "{}", success_info);
+                    log::info!(target: "gantry_emulator", "{}", success_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");
@@ -110,7 +110,7 @@ pub async fn spawn_gantry_emulator_server(
                         failure_cause: cause,
                         info: failure_info.clone(),
                     };
-                    r2r::log_error!("gantry_emulator", "{}", failure_info);
+                    log::error!(target: "gantry_emulator", "{}", failure_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");

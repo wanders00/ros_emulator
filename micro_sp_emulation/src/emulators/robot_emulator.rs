@@ -59,26 +59,26 @@ pub async fn spawn_robot_emulator_server(
 
                 let mut checked_mounted_tool = "UNKNOWN".to_string();
                 match request.message.command.as_str() {
-                    "move" => r2r::log_info!(
+                    "move" => log::info!(target:
                         "robot_emulator",
                         "Got request to move to {}.",
                         request.message.position
                     ),
                     "pick" => {
-                        r2r::log_info!("robot_emulator", "Got request to pick.")
+                        log::info!(target: "robot_emulator", "Got request to pick.")
                     }
-                    "place" => r2r::log_info!("robot_emulator", "Got request to place."),
-                    "mount" => r2r::log_info!("robot_emulator", "Got request to mount."),
-                    "unmount" => r2r::log_info!("robot_emulator", "Got request to unmount."),
+                    "place" => log::info!(target: "robot_emulator", "Got request to place."),
+                    "mount" => log::info!(target: "robot_emulator", "Got request to mount."),
+                    "unmount" => log::info!(target: "robot_emulator", "Got request to unmount."),
                     "check_mounted_tool" => {
                         checked_mounted_tool = vec!["gripper_tool", "suction_tool", "none"]
                             .choose(&mut rand::thread_rng())
                             .unwrap()
                             .to_string();
-                        r2r::log_info!("robot_emulator", "Got request to check_mounted_tool.")
+                        log::info!(target: "robot_emulator", "Got request to check_mounted_tool.")
                     }
                     _ => {
-                        r2r::log_warn!("robot_emulator", "Unknown command");
+                        log::warn!(target: "robot_emulator", "Unknown command");
                         fail = true;
                     }
                 };
@@ -115,7 +115,7 @@ pub async fn spawn_robot_emulator_server(
                         info: success_info.clone(),
                         checked_mounted_tool,
                     };
-                    r2r::log_info!("robot_emulator", "{}", success_info);
+                    log::info!(target: "robot_emulator", "{}", success_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");
@@ -127,7 +127,7 @@ pub async fn spawn_robot_emulator_server(
                         info: failure_info.clone(),
                         checked_mounted_tool,
                     };
-                    r2r::log_error!("robot_emulator", "{}", failure_info);
+                    log::error!(target: "robot_emulator", "{}", failure_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");
