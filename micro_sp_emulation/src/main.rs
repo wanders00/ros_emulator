@@ -62,11 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     let tx_clone = tx.clone();
-    tokio::task::spawn(async move {
-        robot_client_ticker(arc_node_clone, tx_clone)
-            .await
-            .unwrap()
-    });
+    tokio::task::spawn(async move { robot_client_ticker(arc_node_clone, tx_clone).await.unwrap() });
 
     tokio::time::sleep(std::time::Duration::from_millis(200)).await;
 
@@ -74,11 +70,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let model_clone = model.clone();
     let tx_clone = tx.clone();
-    tokio::task::spawn(async move {
-        planner_ticker(&model_clone, tx_clone)
-            .await
-            .unwrap()
-    });
+    tokio::task::spawn(async move { planner_ticker(&model_clone, tx_clone).await.unwrap() });
 
     tokio::time::sleep(std::time::Duration::from_millis(200)).await;
     r2r::log_info!(NODE_ID, "Spawning auto transition runner...");
@@ -97,7 +89,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let arc_node_clone: Arc<Mutex<r2r::Node>> = arc_node.clone();
     let tx_clone = tx.clone();
     tokio::task::spawn(async move {
-        spawn_state_publisher( arc_node_clone, tx_clone)
+        spawn_state_publisher(arc_node_clone, tx_clone)
             .await
             .unwrap()
     });
@@ -153,15 +145,19 @@ async fn perform_test(
 
     'test_loop: loop {
         let (response_tx, response_rx) = oneshot::channel();
-        command_sender.send(StateManagement::GetState(response_tx)).await?; // TODO: maybe we can just ask for values from the guard
+        command_sender
+            .send(StateManagement::GetState(response_tx))
+            .await?; // TODO: maybe we can just ask for values from the guard
         let state = response_rx.await?;
 
-        let plan_state = state
-            .get_or_default_string(&format!("{}_tester", name), &format!("{}_plan_state", name));
+        let plan_state = state.get_string_or_default_to_unknown(
+            &format!("{}_tester", name),
+            &format!("{}_plan_state", name),
+        );
 
         if goals.len() != 0 {
             // println!("{:?}", goals);
-            
+
             if PlanState::from_str(&plan_state) == PlanState::Failed
                 || PlanState::from_str(&plan_state) == PlanState::Completed
                 || PlanState::from_str(&plan_state) == PlanState::UNKNOWN
@@ -169,7 +165,7 @@ async fn perform_test(
                 test_nr = test_nr + 1;
                 r2r::log_warn!(NODE_ID, "Starting test {}.", test_nr);
                 let new_state = state
-                    // Optional to test what happens when... (look in the Emulation msg for details) 
+                    // Optional to test what happens when... (look in the Emulation msg for details)
                     .update("gantry_emulate_execution_time", 2.to_spvalue())
                     .update("gantry_emulated_execution_time", 3000.to_spvalue())
                     .update("gantry_emulate_failure_rate", 2.to_spvalue())
@@ -183,10 +179,10 @@ async fn perform_test(
                     .update("minimal_model_replan_trigger", true.to_spvalue())
                     .update("minimal_model_replanned", false.to_spvalue());
 
-                    let modified_state = state.get_diff_partial_state(&new_state);
-                    command_sender
-                        .send(StateManagement::SetPartialState(modified_state))
-                        .await?;
+                let modified_state = state.get_diff_partial_state(&new_state);
+                command_sender
+                    .send(StateManagement::SetPartialState(modified_state))
+                    .await?;
                 tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
             }
         } else {

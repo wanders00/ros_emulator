@@ -33,34 +33,48 @@ pub async fn gantry_client_ticker(
 
     loop {
         let (response_tx, response_rx) = oneshot::channel();
-        command_sender.send(StateManagement::GetState(response_tx)).await?;
+        command_sender
+            .send(StateManagement::GetState(response_tx))
+            .await?;
         let state = response_rx.await?;
 
-        let mut request_trigger = state.get_or_default_bool(target, "gantry_request_trigger");
-        let mut request_state = state.get_or_default_string(target, "gantry_request_state");
-        let mut total_fail_counter = state.get_or_default_i64(target, "gantry_total_fail_counter");
+        let mut request_trigger =
+            state.get_bool_or_default_to_false(target, "gantry_request_trigger");
+        let mut request_state =
+            state.get_string_or_default_to_unknown(target, "gantry_request_state");
+        let mut total_fail_counter =
+            state.get_int_or_default_to_zero(target, "gantry_total_fail_counter");
         let mut subsequent_fail_counter =
-            state.get_or_default_i64(target, "gantry_subsequent_fail_counter");
-        let gantry_command_command = state.get_or_default_string(target, "gantry_command_command");
-        let gantry_speed_command = state.get_or_default_f64(target, "gantry_speed_command");
+            state.get_int_or_default_to_zero(target, "gantry_subsequent_fail_counter");
+        let gantry_command_command =
+            state.get_string_or_default_to_unknown(target, "gantry_command_command");
+        let gantry_speed_command = state.get_float_or_default_to_zero(target, "gantry_speed_command");
         let gantry_position_command =
-            state.get_or_default_string(target, "gantry_position_command");
+            state.get_string_or_default_to_unknown(target, "gantry_position_command");
         let mut gantry_position_estimated =
-            state.get_or_default_string(target, "gantry_position_estimated");
+            state.get_string_or_default_to_unknown(target, "gantry_position_estimated");
         let mut gantry_calibrated_estimated =
-            state.get_or_default_bool(target, "gantry_calibrated_estimated");
-        let mut gantry_locked_estimated = state.get_bool(target, "gantry_locked_estimated");
+            state.get_bool_or_default_to_false(target, "gantry_calibrated_estimated");
+        let mut gantry_locked_estimated =
+            state.get_bool_or_default_to_false(target, "gantry_locked_estimated");
         let emulate_execution_time =
-            state.get_or_default_i64(target, "gantry_emulate_execution_time");
+            state.get_int_or_default_to_zero(target, "gantry_emulate_execution_time");
         let emulated_execution_time =
-            state.get_or_default_i64(target, "gantry_emulated_execution_time");
-        let emulate_failure_rate = state.get_or_default_i64(target, "gantry_emulate_failure_rate");
+            state.get_int_or_default_to_zero(target, "gantry_emulated_execution_time");
+        let emulate_failure_rate =
+            state.get_int_or_default_to_zero(target, "gantry_emulate_failure_rate");
         let emulated_failure_rate =
-            state.get_or_default_i64(target, "gantry_emulated_failure_rate");
+            state.get_int_or_default_to_zero(target, "gantry_emulated_failure_rate");
         let emulate_failure_cause =
-            state.get_or_default_i64(target, "gantry_emulate_failure_cause");
-        let emulated_failure_cause =
-            state.get_or_default_array_of_strings(target, "gantry_emulated_failure_cause");
+            state.get_int_or_default_to_zero(target, "gantry_emulate_failure_cause");
+        let emulated_failure_cause_sp_value =
+            state.get_array_or_default_to_empty(target, "gantry_emulated_failure_cause");
+
+        let emulated_failure_cause: Vec<String> = emulated_failure_cause_sp_value
+            .iter()
+            .filter(|val| val.is_string())
+            .map(|y| y.to_string())
+            .collect();
 
         if request_trigger {
             request_trigger = false;
@@ -131,7 +145,7 @@ pub async fn gantry_client_ticker(
                                 if response.success {
                                     r2r::log_info!("gantry_interface", "Requested lock succeeded.");
                                     request_state = ServiceRequestState::Succeeded.to_string();
-                                    gantry_locked_estimated = Some(true);
+                                    gantry_locked_estimated = true;
                                     subsequent_fail_counter = 0;
                                 } else {
                                     r2r::log_error!("gantry_interface", "Requested lock failed.");
@@ -147,7 +161,7 @@ pub async fn gantry_client_ticker(
                                         "Requested unlock succeeded."
                                     );
                                     request_state = ServiceRequestState::Succeeded.to_string();
-                                    gantry_locked_estimated = Some(false);
+                                    gantry_locked_estimated = false;
                                     subsequent_fail_counter = 0;
                                 } else {
                                     r2r::log_error!("gantry_interface", "Requested unlock failed.");

@@ -33,13 +33,37 @@ pub async fn spawn_state_publisher(
             let _ = map.insert(
                 k.to_string(),
                 match &v.val {
-                    SPValue::Array(_, val) => Value::from(format!("{:?}", val)),
-                    SPValue::Bool(val) => Value::from(format!("{}", val)),
-                    SPValue::Float64(val) => Value::from(format!("{}", val)),
-                    SPValue::String(val) => Value::from(format!("{}", val)),
-                    SPValue::Int64(val) => Value::from(format!("{}", val)),
-                    SPValue::Time(val) => Value::from(format!("{:?}", val)),
-                    SPValue::Unknown(_) => Value::from(format!("UNKNOWN")),
+                    SPValue::Array(a) => Value::from(match a {
+                        ArrayOrUnknown::Array(a_val) => {
+                            let items_str = a_val
+                                .iter()
+                                .map(|item| item.to_string())
+                                .collect::<Vec<_>>()
+                                .join(", ");
+                            format!("[{}]", items_str)
+                        }
+                        ArrayOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
+                    SPValue::Bool(b) => Value::from(match b {
+                        BoolOrUnknown::Bool(b_val) => format!("{}", b_val),
+                        BoolOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
+                    SPValue::Float64(f) => Value::from(match f {
+                        FloatOrUnknown::Float64(f_val) => format!("{}", f_val.into_inner()),
+                        FloatOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
+                    SPValue::String(s) => Value::from(match s {
+                        StringOrUnknown::String(s_val) => format!("{}", s_val),
+                        StringOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
+                    SPValue::Int64(i) => Value::from(match i {
+                        IntOrUnknown::Int64(i_val) => format!("{}", i_val),
+                        IntOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
+                    SPValue::Time(t) => Value::from(match t {
+                        TimeOrUnknown::Time(t_val) => format!("{:?}", t_val.elapsed().unwrap_or_default()),
+                        TimeOrUnknown::UNKNOWN => "UNKNOWN".to_string(),
+                    }),
                 },
             );
         });

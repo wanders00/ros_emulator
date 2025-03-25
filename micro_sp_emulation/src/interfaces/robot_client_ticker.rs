@@ -30,33 +30,49 @@ pub async fn robot_client_ticker(
 
     loop {
         let (response_tx, response_rx) = oneshot::channel();
-        command_sender.send(StateManagement::GetState(response_tx)).await?;
+        command_sender
+            .send(StateManagement::GetState(response_tx))
+            .await?;
         let state = response_rx.await?;
 
-        let mut request_trigger = state.get_or_default_bool(target, "robot_request_trigger");
-        let mut request_state = state.get_or_default_string(target, "robot_request_state");
-        let mut total_fail_counter = state.get_or_default_i64(target, "robot_total_fail_counter");
+        let mut request_trigger =
+            state.get_bool_or_default_to_false(target, "robot_request_trigger");
+        let mut request_state =
+            state.get_string_or_default_to_unknown(target, "robot_request_state");
+        let mut total_fail_counter =
+            state.get_int_or_default_to_zero(target, "robot_total_fail_counter");
         let mut subsequent_fail_counter =
-            state.get_or_default_i64(target, "robot_subsequent_fail_counter");
-        let robot_command_command = state.get_or_default_string(target, "robot_command_command");
-        let robot_speed_command = state.get_or_default_f64(target, "robot_speed_command");
-        let robot_position_command = state.get_or_default_string(target, "robot_position_command");
+            state.get_int_or_default_to_zero(target, "robot_subsequent_fail_counter");
+        let robot_command_command =
+            state.get_string_or_default_to_unknown(target, "robot_command_command");
+        let robot_speed_command = state.get_float_or_default_to_zero(target, "robot_speed_command");
+        let robot_position_command =
+            state.get_string_or_default_to_unknown(target, "robot_position_command");
         let mut robot_position_estimated =
-            state.get_or_default_string(target, "robot_position_estimated");
+            state.get_string_or_default_to_unknown(target, "robot_position_estimated");
         // let mut robot_mounted_estimated =
         //     state.get_or_default_string(target, "robot_mounted_estimated");
         // let mut robot_locked_estimated = state.get_bool(target, "robot_locked_estimated");
         let mut robot_mounted_one_time_measured =
-            state.get_or_default_string(target, "robot_mounted_one_time_measured");
+            state.get_string_or_default_to_unknown(target, "robot_mounted_one_time_measured");
         let emulate_execution_time =
-            state.get_or_default_i64(target, "robot_emulate_execution_time");
+            state.get_int_or_default_to_zero(target, "robot_emulate_execution_time");
         let emulated_execution_time =
-            state.get_or_default_i64(target, "robot_emulated_execution_time");
-        let emulate_failure_rate = state.get_or_default_i64(target, "robot_emulate_failure_rate");
-        let emulated_failure_rate = state.get_or_default_i64(target, "robot_emulated_failure_rate");
-        let emulate_failure_cause = state.get_or_default_i64(target, "robot_emulate_failure_cause");
-        let emulated_failure_cause =
-            state.get_or_default_array_of_strings(target, "robot_emulated_failure_cause");
+            state.get_int_or_default_to_zero(target, "robot_emulated_execution_time");
+        let emulate_failure_rate =
+            state.get_int_or_default_to_zero(target, "robot_emulate_failure_rate");
+        let emulated_failure_rate =
+            state.get_int_or_default_to_zero(target, "robot_emulated_failure_rate");
+        let emulate_failure_cause =
+            state.get_int_or_default_to_zero(target, "robot_emulate_failure_cause");
+        let emulated_failure_cause_sp_value =
+            state.get_array_or_default_to_empty(target, "gantry_emulated_failure_cause");
+
+        let emulated_failure_cause: Vec<String> = emulated_failure_cause_sp_value
+            .iter()
+            .filter(|val| val.is_string())
+            .map(|y| y.to_string())
+            .collect();
 
         if request_trigger {
             request_trigger = false;

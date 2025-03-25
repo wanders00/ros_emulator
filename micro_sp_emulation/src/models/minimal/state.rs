@@ -62,7 +62,7 @@ fn generate_emulation_variables(name: &str, state: &State) -> State {
     let state = state.add(assign!(emulated_failure_rate, 0.to_spvalue()));
     let state = state.add(assign!(
         emulated_failure_cause,
-        SPValue::Array(SPValueType::String, vec![])
+        SPValue::Array(ArrayOrUnknown::Array(vec![]))
     ));
 
     state
@@ -84,9 +84,15 @@ pub fn state() -> State {
     let gantry_speed_command = fv!("gantry_speed_command");
     let gantry_position_command = v!("gantry_position_command");
 
-    let state = state.add(assign!(gantry_command_command, SPValue::Unknown(SPValueType::String)));
+    let state = state.add(assign!(
+        gantry_command_command,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
     let state = state.add(assign!(gantry_speed_command, 0.0.to_spvalue()));
-    let state = state.add(assign!(gantry_position_command, SPValue::Unknown(SPValueType::String)));
+    let state = state.add(assign!(
+        gantry_position_command,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
 
     // We estimate (memory variables) the following, since we cannot directly measure
     let gantry_speed_measured = fv!("gantry_speed_estimated");
@@ -94,10 +100,22 @@ pub fn state() -> State {
     let gantry_calibrated_estimated = bv!("gantry_calibrated_estimated");
     let gantry_locked_estimated = bv!("gantry_locked_estimated");
 
-    let state = state.add(assign!(gantry_calibrated_estimated, SPValue::Unknown(SPValueType::Bool)));
-    let state = state.add(assign!(gantry_locked_estimated, SPValue::Unknown(SPValueType::Bool)));
-    let state = state.add(assign!(gantry_speed_measured, SPValue::Unknown(SPValueType::Float64)));
-    let state = state.add(assign!(gantry_position_estimated, SPValue::Unknown(SPValueType::String)));
+    let state = state.add(assign!(
+        gantry_calibrated_estimated,
+        SPValue::Bool(BoolOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        gantry_locked_estimated,
+        SPValue::Bool(BoolOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        gantry_speed_measured,
+        SPValue::Float64(FloatOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        gantry_position_estimated,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
 
     // Optional: emulate gantry failure and execution time
     let state = generate_emulation_variables("gantry", &state);
@@ -115,9 +133,15 @@ pub fn state() -> State {
     let robot_speed_command = fv!("robot_speed_command");
     let robot_position_command = v!("robot_position_command");
 
-    let state = state.add(assign!(robot_command_command, SPValue::Unknown(SPValueType::String)));
+    let state = state.add(assign!(
+        robot_command_command,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
     let state = state.add(assign!(robot_speed_command, 0.0.to_spvalue()));
-    let state = state.add(assign!(robot_position_command, SPValue::Unknown(SPValueType::String)));
+    let state = state.add(assign!(
+        robot_position_command,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
 
     // We estimate (memory variables) the following, since we cannot directly measure
     let robot_speed_measured = fv!("robot_speed_estimated");
@@ -127,12 +151,27 @@ pub fn state() -> State {
     let asdf = bv!("asdf");
     let robot_mounted_one_time_measured = v!("robot_mounted_one_time_measured");
 
-    let state = state.add(assign!(robot_speed_measured, SPValue::Unknown(SPValueType::Float64)));
-    let state = state.add(assign!(robot_position_estimated, SPValue::Unknown(SPValueType::String)));
-    let state = state.add(assign!(robot_mounted_estimated, SPValue::Unknown(SPValueType::String)));
-    let state = state.add(assign!(robot_mounted_checked, SPValue::Bool(false)));
-    let state = state.add(assign!(robot_mounted_one_time_measured, SPValue::Unknown(SPValueType::String)));
-    let state = state.add(assign!(asdf, SPValue::Bool(false)));
+    let state = state.add(assign!(
+        robot_speed_measured,
+        SPValue::Float64(FloatOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        robot_position_estimated,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        robot_mounted_estimated,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(
+        robot_mounted_checked,
+        SPValue::Bool(BoolOrUnknown::Bool(false))
+    ));
+    let state = state.add(assign!(
+        robot_mounted_one_time_measured,
+        SPValue::String(StringOrUnknown::UNKNOWN)
+    ));
+    let state = state.add(assign!(asdf, SPValue::Bool(BoolOrUnknown::Bool(false))));
 
     // let robot_mode_measured = v!("robot_mode_measured"); // safety_stop, emergency_stop, operational
 
