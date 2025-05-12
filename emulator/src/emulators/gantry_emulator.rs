@@ -1,18 +1,18 @@
 use futures::StreamExt;
-use r2r::micro_sp_emulation_msgs::srv::TriggerRobot;
+use r2r::emulation_msgs::srv::TriggerGantry;
 use r2r::QosProfile;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use std::sync::{Arc, Mutex};
 
-pub async fn spawn_robot_emulator_server(
+pub async fn spawn_gantry_emulator_server(
     arc_node: Arc<Mutex<r2r::Node>>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let mut service = arc_node
         .lock()
         .unwrap()
-        .create_service::<TriggerRobot::Service>(
-            "/robot_emulator_service",
+        .create_service::<TriggerGantry::Service>(
+            "/gantry_emulator_service",
             QosProfile::default(),
         )?;
 
@@ -57,39 +57,28 @@ pub async fn spawn_robot_emulator_server(
                     _ => "generic_failure".to_string(),
                 };
 
-                let mut checked_mounted_tool = "UNKNOWN".to_string();
                 match request.message.command.as_str() {
                     "move" => r2r::log_info!(
-                        "robot_emulator",
+                        "gantry_emulator",
                         "Got request to move to {}.",
                         request.message.position
                     ),
-                    "pick" => {
-                        r2r::log_info!("robot_emulator", "Got request to pick.")
+                    "calibrate" => {
+                        r2r::log_info!("gantry_emulator", "Got request to calibrate.")
                     }
-                    "place" => r2r::log_info!("robot_emulator", "Got request to place."),
-                    "mount" => r2r::log_info!("robot_emulator", "Got request to mount."),
-                    "unmount" => r2r::log_info!("robot_emulator", "Got request to unmount."),
-                    "check_mounted_tool" => {
-                        checked_mounted_tool = vec!["gripper_tool", "suction_tool", "none"]
-                            .choose(&mut rand::thread_rng())
-                            .unwrap()
-                            .to_string();
-                        r2r::log_info!("robot_emulator", "Got request to check_mounted_tool.")
-                    }
+                    "lock" => r2r::log_info!("gantry_emulator", "Got request to lock."),
+                    "unlock" => r2r::log_info!("gantry_emulator", "Got request to unlock."),
                     _ => {
-                        r2r::log_warn!("robot_emulator", "Unknown command");
+                        r2r::log_warn!("gantry_emulator", "Unknown command");
                         fail = true;
                     }
                 };
 
                 let success_info = match request.message.command.as_str() {
                     "move" => format!("Succeeded to move to {}.", request.message.position),
-                    "pick" => "Succeeded to pick.".to_string(),
-                    "place" => "Succeeded to place.".to_string(),
-                    "mount" => "Succeeded to mount.".to_string(),
-                    "unmount" => "Succeeded to unmount.".to_string(),
-                    "check_mounted_tool" => "Succeeded to check_mounted_tool.".to_string(),
+                    "calibrate" => "Succeeded to calibrate.".to_string(),
+                    "lock" => "Succeeded to lock.".to_string(),
+                    "unlock" => "Succeeded to unlock.".to_string(),
                     _ => "Failed, unknown command".to_string(),
                 };
 
@@ -98,36 +87,30 @@ pub async fn spawn_robot_emulator_server(
                         "Failed to move to {} due to {}.",
                         request.message.position, cause
                     ),
-                    "pick" => format!("Failed to pick due to {}.", cause),
-                    "place" => format!("Failed to place due to {}.", cause),
-                    "mount" => format!("Failed to mount due to {}.", cause),
-                    "unmount" => format!("Failed to unmount due to {}.", cause),
-                    "check_mounted_tool" => {
-                        format!("Failed to check_mounted_tool due to {}.", cause)
-                    }
+                    "calibrate" => format!("Failed to calibrate due to {}.", cause),
+                    "lock" => format!("Failed to lock due to {}.", cause),
+                    "unlock" => format!("Failed to unlock due to {}.", cause),
                     _ => "Failed, unknown command".to_string(),
                 };
 
                 if !fail {
-                    let response = TriggerRobot::Response {
+                    let response = TriggerGantry::Response {
                         success: true,
                         failure_cause: "".to_string(),
                         info: success_info.clone(),
-                        checked_mounted_tool,
                     };
-                    r2r::log_info!("robot_emulator", "{}", success_info);
+                    r2r::log_info!("gantry_emulator", "{}", success_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");
                     continue;
                 } else {
-                    let response = TriggerRobot::Response {
+                    let response = TriggerGantry::Response {
                         success: false,
                         failure_cause: cause,
                         info: failure_info.clone(),
-                        checked_mounted_tool,
                     };
-                    r2r::log_error!("robot_emulator", "{}", failure_info);
+                    r2r::log_error!("gantry_emulator", "{}", failure_info);
                     request
                         .respond(response)
                         .expect("Could not send service response.");

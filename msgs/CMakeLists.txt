@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(micro_sp_emulation_msgs)
+project(emulation_msgs)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>micro_sp_emulation_msgs</name>
+  <name>emulation_msgs</name>
   <version>0.0.1</version>
-  <description>micro_sp_emulation_msgs</description>
+  <description>emulation_msgs</description>
   <maintainer email="endre.eros@chalmersindustriteknik.se">Endre Erős</maintainer>
   <license>Apache License 2.0</license>
   <author>Endre Erős</author>

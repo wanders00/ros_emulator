@@ -1,11 +1,15 @@
-## An r2r emulation example using micro_sp
+## An R2R emulator for ROS2
 
-1. Install rust and rust_analyzer for inlay hints (makes modeling easier)
+1. Source ROS workspace with `source /opt/ros/<distro>/setup.bash`
 2. Build with `colcon build` in a workspace to build the custom msgs
-3. Run the example with `cargo run`
+3. Source the workspace with `source install/setup.bash`
+4. Navigate to the `emulator` folder
+5. Run with `cargo run`
 
+<!--
 ## Architecture:
 ![](figures/architecture.png)
+-->
 
 ## Features:
 We emulate two resources, a robot and a gantry. These resources can perform some dummy actions, move, calibrate, lock, unlock for the gantry, and move, pick, place, mount, unmount, check_mounted_tool for the robot. In reality, problems arise during execution so these actions can fail and timeout. To emulate such failures and timeouts, we can send a nested Emulation message in the command request to the nodes, forcing them to fail or timeout. This helps us develop the initial behavior model much easier, without the need of connecting to real equipment or simulations.  
@@ -17,8 +21,6 @@ Exchange the emulation with the real resource driver or simulation, and update t
 To disable all failure emulation and test only for nominal behavior, set all emulation values to 0.
 
 To emulate failure, inject emulation state like this (gantry example):
-
-TODO: set_state ROS2 service so that we can do this from other nodes.
 ```
 let new_state = state
     .update("gantry_emulate_execution_time", 2.to_spvalue())
