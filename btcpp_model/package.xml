@@ -13,6 +13,8 @@
 
   <depend>rclcpp</depend>
   <depend>behaviortree_cpp</depend>
+  <build_depend>emulation_msgs</build_depend>
+  <exec_depend>emulation_msgs</exec_depend>
 
   <export>
     <build_type condition="$ROS_VERSION == 1">catkin</build_type>
