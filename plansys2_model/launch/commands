@@ -1,0 +1,16 @@
+set instance gantry1 gantry
+set instance robot1 robot
+set instance tool1 tool
+set instance a1 location
+set instance b1 location
+
+get problem instances
+
+set predicate (at_robot robot1 a1)
+set predicate (at_gantry gantry1 a1)
+
+get problem predicates
+
+set goal (and (at_robot robot1 b1) (mounted robot1 tool1) (calibrated gantry1) (locked gantry1))
+get plan
+run
