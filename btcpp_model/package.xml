@@ -1,10 +1,10 @@
 <package format="3">
   <name>btcpp_model</name>
   <version>0.1.0</version>
-  <description>Dummy project to check compiling</description>
+  <description>BehaviorTree.CPP Model for ROS Emulator</description>
 
   <maintainer email="noreply@example.com">William Andersson and Vasilena Karaivanova</maintainer>
-  <license>MIT</license>
+  <license>no_license</license>
   <author>William Andersson</author>
   <author>Vasilena Karaivanova</author>
 
