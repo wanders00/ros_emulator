@@ -1,5 +1,5 @@
-pub static EMULATOR_NODE_ID: &'static str = "micro_sp_emulator";
-pub static NODE_ID: &'static str = "micro_sp_emulator";
+pub static EMULATOR_NODE_ID: &'static str = "emulator";
+pub static NODE_ID: &'static str = "emulator";
 pub static TEST_TICKER_RATE: u64 = 1000; // milliseconds
 pub static CLIENT_TICKER_RATE: u64 = 100; // milliseconds
 pub static PUBLISHER_TICKER_RATE: u64 = 100; // milliseconds
