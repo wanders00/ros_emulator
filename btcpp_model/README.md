@@ -10,8 +10,18 @@ Inspiration taken from:
 ## How to run:
 
 1. Source ROS workspace with `source /opt/ros/jazzy/setup.bash`
-2. Build with `colcon build --packages-select btcpp_model`
-3. Run with `ros2 launch btcpp_model btcpp_model.launch.py`
+2. Build the package(s):
+   - **Option 1:** Build all packages in the workspace:
+     ```bash
+     colcon build
+     ```
+   - **Option 2:** Build only this package:
+     ```bash
+     source install/setup.bash
+     colcon build --packages-select btcpp_model
+     ```
+3. Source the workspace: `source install/setup.bash` if not already done.
+4. Run with `ros2 launch btcpp_model btcpp_model.launch.py`
 
 ## Example run:
 

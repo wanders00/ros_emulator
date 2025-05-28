@@ -18,11 +18,34 @@ BT::NodeStatus RobotEmulatorAction::tick() {
     getInput("position", request->position);
     RCLCPP_INFO(node_->get_logger(), "Command: %s, Position: %s", request->command.c_str(), request->position.c_str());
 
-    request->emulated_response.emulate_execution_time = getInput<uint8_t>("emulate_execution_time").value_or(0);
-    request->emulated_response.emulated_execution_time = getInput<int32_t>("emulated_execution_time").value_or(0);
-    request->emulated_response.emulate_failure_rate = getInput<uint8_t>("emulate_failure_rate").value_or(0);
-    request->emulated_response.emulated_failure_rate = getInput<int32_t>("emulated_failure_rate").value_or(0);
-    request->emulated_response.emulate_failure_cause = getInput<uint8_t>("emulate_failure_cause").value_or(0);
+    // Set emulation parameters from environment variables or default to 0
+    auto get_env_or_zero = [](const char* var) -> int {
+        const char* val = std::getenv(var);
+        if (val) {
+            try {
+                return std::stoi(val);
+            } catch (...) {
+                return 0;
+            }
+        }
+        return 0;
+    };
+    request->emulated_response.emulate_execution_time = get_env_or_zero("ROBOT_EMULATE_EXECUTION_TIME");
+    request->emulated_response.emulated_execution_time = get_env_or_zero("ROBOT_EMULATED_EXECUTION_TIME");
+    request->emulated_response.emulate_failure_rate = get_env_or_zero("ROBOT_EMULATE_FAILURE_RATE");
+    request->emulated_response.emulated_failure_rate = get_env_or_zero("ROBOT_EMULATED_FAILURE_RATE");
+    request->emulated_response.emulate_failure_cause = get_env_or_zero("ROBOT_EMULATE_FAILURE_CAUSE");
+
+    // Set emulated_failure_cause from env if present
+    const char* causes_env = std::getenv("ROBOT_EMULATED_FAILURE_CAUSE");
+    if (causes_env) {
+        std::stringstream ss(causes_env);
+        std::string cause;
+        request->emulated_response.emulated_failure_cause.clear();
+        while (std::getline(ss, cause, ',')) {
+            request->emulated_response.emulated_failure_cause.push_back(cause);
+        }
+    }
 
     if (request->emulated_response.emulate_failure_cause != 0) {
         std::string causes;
@@ -55,11 +78,6 @@ BT::NodeStatus RobotEmulatorAction::tick() {
 BT::PortsList RobotEmulatorAction::providedPorts() {
     return {
         BT::InputPort<std::string>("command"),
-        BT::InputPort<std::string>("position"),
-        BT::InputPort<uint8_t>("emulate_execution_time"),
-        BT::InputPort<int32_t>("emulated_execution_time"),
-        BT::InputPort<uint8_t>("emulate_failure_rate"),
-        BT::InputPort<int32_t>("emulated_failure_rate"),
-        BT::InputPort<uint8_t>("emulate_failure_cause"),
-        BT::InputPort<std::string>("emulated_failure_cause")};
+        BT::InputPort<std::string>("position")
+    };
 }

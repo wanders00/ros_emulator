@@ -4,32 +4,14 @@
       <RobotEmulatorAction
         command="mount"
         position="tool1"
-        emulate_execution_time="0"
-        emulated_execution_time="0"
-        emulate_failure_rate="0"
-        emulated_failure_rate="0"
-        emulate_failure_cause="0"
-        emulated_failure_cause=""
       />
       <GantryEmulatorAction
         command="move"
         position="A1"
-        emulate_execution_time="0"
-        emulated_execution_time="0"
-        emulate_failure_rate="0"
-        emulated_failure_rate="0"
-        emulate_failure_cause="0"
-        emulated_failure_cause=""
       />
       <RobotEmulatorAction
         command="unmount"
         position="tool1"
-        emulate_execution_time="0"
-        emulated_execution_time="0"
-        emulate_failure_rate="0"
-        emulated_failure_rate="0"
-        emulate_failure_cause="0"
-        emulated_failure_cause=""
       />
     </Sequence>
   </BehaviorTree>
