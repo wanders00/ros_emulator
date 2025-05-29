@@ -3,8 +3,9 @@ project(plansys2_model)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(plansys2_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(plansys2_executor REQUIRED)
+find_package(plansys2_msgs REQUIRED)
 find_package(emulation_msgs REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -29,16 +30,16 @@ add_executable(robot_move_action_node src/robot_move_action_node.cpp)
 add_executable(robot_mount_action_node src/robot_mount_action_node.cpp)
 add_executable(robot_unmount_action_node src/robot_unmount_action_node.cpp)
 
-ament_target_dependencies(gantry_move_action_node rclcpp plansys2_executor emulation_msgs)
-ament_target_dependencies(gantry_calibrate_action_node rclcpp plansys2_executor emulation_msgs)
-ament_target_dependencies(gantry_lock_action_node rclcpp plansys2_executor emulation_msgs)
-ament_target_dependencies(gantry_unlock_action_node rclcpp plansys2_executor emulation_msgs)
+ament_target_dependencies(gantry_move_action_node ${dependencies})
+ament_target_dependencies(gantry_calibrate_action_node ${dependencies})
+ament_target_dependencies(gantry_lock_action_node ${dependencies})
+ament_target_dependencies(gantry_unlock_action_node ${dependencies})
 
-ament_target_dependencies(robot_move_action_node rclcpp plansys2_executor emulation_msgs)
-ament_target_dependencies(robot_mount_action_node rclcpp plansys2_executor emulation_msgs)
-ament_target_dependencies(robot_unmount_action_node rclcpp plansys2_executor emulation_msgs)
+ament_target_dependencies(robot_move_action_node ${dependencies})
+ament_target_dependencies(robot_mount_action_node ${dependencies})
+ament_target_dependencies(robot_unmount_action_node ${dependencies})
 
-install(DIRECTORY launch pddl DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch pddl include DESTINATION share/${PROJECT_NAME})
 
 install(TARGETS
   gantry_move_action_node

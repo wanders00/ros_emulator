@@ -26,7 +26,6 @@ def generate_launch_description():
             'plansys2_bringup_launch_monolithic.py')),
         launch_arguments={
             'model_file': directory + '/pddl/domain.pddl',
-            'problem_file': directory + '/pddl/problem.pddl',
             'namespace': namespace
         }.items())
 
@@ -36,6 +35,7 @@ def generate_launch_description():
         name='gantry_move_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
     gantry_calibrate_cmd = Node(
         package='plansys2_model',
@@ -43,6 +43,7 @@ def generate_launch_description():
         name='gantry_calibrate_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
     gantry_lock_cmd = Node(
         package='plansys2_model',
@@ -50,6 +51,7 @@ def generate_launch_description():
         name='gantry_lock_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
     gantry_unlock_cmd = Node(
         package='plansys2_model',
@@ -57,6 +59,7 @@ def generate_launch_description():
         name='gantry_unlock_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
 
     robot_move_cmd = Node(
@@ -65,6 +68,7 @@ def generate_launch_description():
         name='robot_move_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
     robot_mount_cmd = Node(
         package='plansys2_model',
@@ -72,6 +76,7 @@ def generate_launch_description():
         name='robot_mount_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
     robot_unmount_cmd = Node(
         package='plansys2_model',
@@ -79,6 +84,7 @@ def generate_launch_description():
         name='robot_unmount_action_node',
         namespace=namespace,
         output='screen',
+        parameters=[]
     )
 
     goal_cmd = Node(
