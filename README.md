@@ -1,19 +1,30 @@
-## An R2R emulator for ROS2
+# An R2R emulator for ROS2
+
+## Prerequisites:
+This software was developed and tested on WSL using Ubuntu 22.04 with ROS2 Jazzy.
+
+It requires the following dependencies:
+- [Rust](https://www.rust-lang.org/tools/install)
+- [ROS2](https://docs.ros.org/en/jazzy/Installation.html)
+- Packages for C++ (build-essential, cmake, etc.)
+
+## How to run
 
 1. Source ROS workspace with `source /opt/ros/<distro>/setup.bash`
 2. Build with `colcon build` in a workspace to build the custom msgs
 3. Source the workspace with `source install/setup.bash`
 4. Navigate to the `emulator` folder
 5. Run with `cargo run`
-
-## Architecture:
-![](figures/architecture.png)
+6. Run one of the models, see the respective README.md for the model you want to run.
 
 ## Features:
 We emulate two resources, a robot and a gantry. These resources can perform some dummy actions, move, calibrate, lock, unlock for the gantry, and move, pick, place, mount, unmount, check_mounted_tool for the robot. In reality, problems arise during execution so these actions can fail and timeout. To emulate such failures and timeouts, we can send a nested Emulation message in the command request to the nodes, forcing them to fail or timeout. This helps us develop the initial behavior model much easier, without the need of connecting to real equipment or simulations.  
 
 ## How is this useful:
 Exchange the emulation with the real resource driver or simulation, and update the model and interfaces. Enables quicker iterations of behavior models.
+
+## Architecture:
+![](figures/architecture.png)
 
 ## Failure Emulation:
 To disable all failure emulation and test only for nominal behavior, set all emulation values to 0.
@@ -38,7 +49,7 @@ let new_state = state
 ```
 where:
 ```
-# DONT_EMULATE_EXECUTION_TIME: The action will be executed immediatelly
+# DONT_EMULATE_EXECUTION_TIME: The action will be executed immediately
 # EMULATE_EXACT_EXECUTION_TIME: The action will always take "emulate_execution_time" amount of time
 # EMULATE_RANDOM_EXECUTION_TIME: The action will randomly take between 0 and "emulated_execution_time" amount of time
 uint8 DONT_EMULATE_EXECUTION_TIME = 0
@@ -47,7 +58,7 @@ uint8 EMULATE_RANDOM_EXECUTION_TIME = 2
 uint8 emulate_execution_time
 int32 emulated_execution_time # milliseconds
 
-# DONT_EMULATE_FAILURE: The action will be execute succesfully every time
+# DONT_EMULATE_FAILURE: The action will be execute successfully every time
 # EMULATE_FAILURE_ALWAYS: The action will always fail
 # EMULATE_RANDOM_FAILURE_RATE: The action will randomly fail with a "emulated_failure_rate" rate
 uint8 DONT_EMULATE_FAILURE = 0

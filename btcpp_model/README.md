@@ -7,6 +7,10 @@ Inspiration taken from:
 - https://github.com/BehaviorTree/BehaviorTree.ROS2
 - https://www.behaviortree.dev/docs/Intro
 
+## Prerequisites:
+
+Install BehaviorTree.CPP package: `sudo apt install ros-jazzy-behaviortree-cpp`
+
 ## How to run:
 
 1. Source ROS workspace with `source /opt/ros/jazzy/setup.bash`

@@ -7,6 +7,10 @@ Inspiration taken from:
 - https://github.com/PlanSys2/ros2_planning_system_examples/tree/rolling/plansys2_bt_example
 - https://plansys2.github.io/
 
+## Prerequisites:
+
+Install PlanSys2 packages: `sudo apt install ros-jazzy-plansys2-*`
+
 ## How to run:
 
 1. Source ROS workspace with `source /opt/ros/jazzy/setup.bash`
@@ -27,25 +31,7 @@ Inspiration taken from:
 
 5. Source ROS workspace with `source /opt/ros/jazzy/setup.bash`
 6. Run the PlanSys2 Terminal `ros2 run plansys2_terminal plansys2_terminal`
-7. Insert:
-    ```
-    set instance gantry1 gantry
-    set instance robot1 robot
-    set instance tool1 tool
-    set instance a1 location
-    set instance b1 location
-
-    get problem instances
-
-    set predicate (at_robot robot1 a1)
-    set predicate (at_gantry gantry1 a1)
-
-    get problem predicates
-
-    set goal (and (at_robot robot1 b1) (mounted robot1 tool1) (calibrated gantry1) (locked gantry1))
-    get plan
-    run
-    ```
+7. Insert the commands for the problem, see file located at `/launch/commands`.
   
 
 ## Example run:
