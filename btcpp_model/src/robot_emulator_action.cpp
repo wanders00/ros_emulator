@@ -78,6 +78,5 @@ BT::NodeStatus RobotEmulatorAction::tick() {
 BT::PortsList RobotEmulatorAction::providedPorts() {
     return {
         BT::InputPort<std::string>("command"),
-        BT::InputPort<std::string>("position")
-    };
+        BT::InputPort<std::string>("position")};
 }

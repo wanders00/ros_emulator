@@ -1,4 +1,5 @@
 #include "btcpp_model/gantry_emulator_action.hpp"
+
 #include <sstream>
 
 GantryEmulatorAction::GantryEmulatorAction(const std::string& name, const BT::NodeConfig& config, rclcpp::Node::SharedPtr node)
@@ -66,6 +67,5 @@ BT::NodeStatus GantryEmulatorAction::tick() {
 BT::PortsList GantryEmulatorAction::providedPorts() {
     return {
         BT::InputPort<std::string>("command"),
-        BT::InputPort<std::string>("position")
-    };
+        BT::InputPort<std::string>("position")};
 }
