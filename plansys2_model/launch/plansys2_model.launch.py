@@ -86,6 +86,14 @@ def generate_launch_description():
         output='screen',
         parameters=[]
     )
+    robot_check_mounted_cmd = Node(
+        package='plansys2_model',
+        executable='robot_check_mounted_action_node',
+        name='robot_check_mounted_action_node',
+        namespace=namespace,
+        output='screen',
+        parameters=[]
+    )
 
     goal_cmd = Node(
         package='plansys2_terminal',
@@ -109,5 +117,6 @@ def generate_launch_description():
     ld.add_action(robot_move_cmd)
     ld.add_action(robot_mount_cmd)
     ld.add_action(robot_unmount_cmd)
+    ld.add_action(robot_check_mounted_cmd)
     # ld.add_action(TimerAction(period=5.0, actions=[goal_cmd]))
     return ld

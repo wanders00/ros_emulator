@@ -1,12 +1,33 @@
 set instance gantry1 gantry
+
 set instance robot1 robot
-set instance tool1 tool
-set instance a1 location
-set instance b1 location
 
-set predicate (robot_at robot1 a1)
-set predicate (gantry_at gantry1 a1)
+set instance suction_tool tool
+set instance gripper_tool tool
+set instance none tool
+set instance unknown tool
 
-set goal (and(robot_at robot1 b1))
+set instance start location
+set instance suction_tool_rack location
+set instance gripper_tool_rack location
+
+set predicate (attached robot1 unknown)
+
+set predicate (robot_at robot1 start)
+
+set predicate (unmounted robot1)
+
+set predicate (gantry_at gantry1 start)
+
+set predicate (uncalibrated gantry1)
+set predicate (locked gantry1)
+
+set predicate (tool_free suction_tool)
+set predicate (tool_free gripper_tool)
+
+set predicate (tool_at suction_tool suction_tool_rack)
+set predicate (tool_at gripper_tool gripper_tool_rack)
+
+set goal (and(mounted robot1)(tool_taken suction_tool))
 get plan
 run

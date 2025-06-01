@@ -29,6 +29,7 @@ add_executable(gantry_unlock_action_node src/gantry_unlock_action_node.cpp)
 add_executable(robot_move_action_node src/robot_move_action_node.cpp)
 add_executable(robot_mount_action_node src/robot_mount_action_node.cpp)
 add_executable(robot_unmount_action_node src/robot_unmount_action_node.cpp)
+add_executable(robot_check_mounted_action_node src/robot_check_mounted_action_node.cpp)
 
 ament_target_dependencies(gantry_move_action_node ${dependencies})
 ament_target_dependencies(gantry_calibrate_action_node ${dependencies})
@@ -38,6 +39,7 @@ ament_target_dependencies(gantry_unlock_action_node ${dependencies})
 ament_target_dependencies(robot_move_action_node ${dependencies})
 ament_target_dependencies(robot_mount_action_node ${dependencies})
 ament_target_dependencies(robot_unmount_action_node ${dependencies})
+ament_target_dependencies(robot_check_mounted_action_node ${dependencies})
 
 install(DIRECTORY launch pddl include DESTINATION share/${PROJECT_NAME})
 
@@ -49,6 +51,7 @@ install(TARGETS
   robot_move_action_node
   robot_mount_action_node
   robot_unmount_action_node
+  robot_check_mounted_action_node
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
