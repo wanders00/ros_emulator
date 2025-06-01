@@ -1,7 +1,7 @@
 # An R2R emulator for ROS2
 
 ## Prerequisites:
-This software was developed and tested on WSL using Ubuntu 22.04 with ROS2 Jazzy.
+This software was developed and tested on WSL using Ubuntu 24.04 with ROS2 Jazzy.
 
 It requires the following dependencies:
 - [Rust](https://www.rust-lang.org/tools/install)
