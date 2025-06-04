@@ -2,16 +2,28 @@
   <BehaviorTree ID="MainTree">
     <Sequence>
       <RobotEmulatorAction
-        command="mount"
-        position="tool1"
+        command="check_mounted_tool"
+        position="robot1"
       />
       <GantryEmulatorAction
-        command="move"
-        position="A1"
+        command="unlock"
+        position="gantry1"
+      />
+      <GantryEmulatorAction
+        command="calibrate"
+        position="gantry1"
+      />
+      <GantryEmulatorAction
+        command="lock"
+        position="gantry1"
       />
       <RobotEmulatorAction
-        command="unmount"
-        position="tool1"
+        command="move"
+        position="suction_tool_rack"
+      />
+      <RobotEmulatorAction
+        command="mount"
+        position="suction_tool"
       />
     </Sequence>
   </BehaviorTree>
