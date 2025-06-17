@@ -1,30 +1,60 @@
 <root BTCPP_format="4" main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
-    <Sequence>
+    <Fallback>
       <RobotEmulatorAction
         command="check_mounted_tool"
-        position="robot1"
-      />
-      <GantryEmulatorAction
-        command="unlock"
-        position="gantry1"
-      />
-      <GantryEmulatorAction
-        command="calibrate"
-        position="gantry1"
-      />
-      <GantryEmulatorAction
-        command="lock"
-        position="gantry1"
-      />
-      <RobotEmulatorAction
-        command="move"
-        position="suction_tool_rack"
-      />
-      <RobotEmulatorAction
-        command="mount"
         position="suction_tool"
       />
-    </Sequence>
+      <Sequence>
+        <Fallback>
+          <RobotEmulatorAction
+            command="is_at"
+            position="suction_tool_rack"
+          />
+          <Sequence>
+            <Fallback>
+              <GantryEmulatorAction
+                command="is_calibrated"
+                position="gantry1"
+              />
+              <Sequence>
+                <Fallback>
+                  <GantryEmulatorAction
+                    command="is_unlocked"
+                    position="gantry1"
+                  />
+                  <GantryEmulatorAction
+                    command="unlock"
+                    position="gantry1"
+                  />
+                </Fallback>
+                <GantryEmulatorAction
+                  command="calibrate"
+                  position="gantry1"
+                />
+              </Sequence>
+            </Fallback>
+            <Fallback>
+              <GantryEmulatorAction
+                command="is_locked"
+                position="gantry1"
+              />
+              <GantryEmulatorAction
+                command="lock"
+                position="gantry1"
+              />
+            </Fallback>
+            <RobotEmulatorAction
+              command="move"
+              position="suction_tool_rack"
+            />
+          </Sequence>
+        </Fallback>
+        <RobotEmulatorAction
+          command="mount"
+          position="suction_tool"
+        />
+      </Sequence>
+    </Fallback>
   </BehaviorTree>
 </root>
