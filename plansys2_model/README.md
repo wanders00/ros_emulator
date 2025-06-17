@@ -4,7 +4,7 @@ A PlanSys2 v2.0.18 model for the emulator. Developed for ROS2 Jazzy.
 
 Inspiration taken from: 
 - https://github.com/PlanSys2/ros2_planning_system_examples
-- https://github.com/PlanSys2/ros2_planning_system_examples/tree/rolling/plansys2_bt_example
+- https://github.com/PlanSys2/ros2_planning_system_examples/tree/rolling/plansys2_simple_example
 - https://plansys2.github.io/
 
 ## Prerequisites:
